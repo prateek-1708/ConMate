@@ -17,7 +17,7 @@ class EtcdClient
 
     private $etcdURL;
     private $etcdVersion;
-
+    private $curlConnect;
     /**
      *
      * EtcdClient constructor.
@@ -29,6 +29,7 @@ class EtcdClient
     public function __construct($url, $etcdVersion = 2) {
         $this->etcdURL = $url;
         $this->etcdVersion = $etcdVersion;
+        $this->curlConnect = CurlConnect::getInstance();
     }
 
     /**
@@ -39,7 +40,7 @@ class EtcdClient
      */
     public function getKeyDetails($key) {
         $url = $this->buildURL($key);
-        return  CurlConnect::getCall(array("url" => $url));
+        return  $this->curlConnect->getCall(array("url" => $url));
     }
 
     /**
@@ -85,53 +86,100 @@ class EtcdClient
     /**
      * @return mixed
      */
-    public function getEtcdURL()
-    {
+    public function getEtcdURL() {
         return $this->etcdURL;
     }
 
     /**
      * @param mixed $etcdURL
      */
-    public function setEtcdURL($etcdURL)
-    {
+    public function setEtcdURL($etcdURL) {
         $this->etcdURL = $etcdURL;
     }
 
     /**
      * @return int
      */
-    public function getEtcdVersion()
-    {
+    public function getEtcdVersion() {
         return $this->etcdVersion;
     }
 
     /**
      * @param int $etcdVersion
      */
-    public function setEtcdVersion($etcdVersion)
-    {
+    public function setEtcdVersion($etcdVersion) {
         $this->etcdVersion = $etcdVersion;
     }
 }
 
-
+/**
+ * Class CurlConnect
+ *
+ * Curl utility class to access etcd apis.
+ * @package Wbd\ConMate
+ */
 class CurlConnect
 {
+    private $info;
+    private static $instance = null;
 
-    public static function getCall(Array $params) {
+    public static function getInstance() {
+        if (null == self::$instance) {
+            self::$instance = new CurlConnect();
+        }
+        return self::$instance;
+    }
 
-        $ch = curl_init($params['url']);
 
-        curl_setopt(
-            $ch,
-            CURLOPT_HTTPHEADER,
-            array('Content-Type: application/json')
+    public function getCall(Array $params) {
+        return $this->curlise($params['url']);
+    }
+
+
+    /**
+     * Curlise means to do the usuall curl stuff with a request.
+     * @param $channel mixed curl channel
+     * @return bool|mixed
+     */
+    public function curlise($channel){
+
+        $result = false;
+
+        // let's create curl channel for all curl shenanigans
+        $ch = curl_init($channel);
+
+        // check if channel exists or not
+        if (false === $ch){
+            return $result;
+        }
+
+        // usual curl stuff I guess.
+        $options = array(
+            CURLOPT_FOLLOWLOCATION => 1,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_SSL_VERIFYPEER => 1,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_FORBID_REUSE => 1,
+            CURLOPT_CONNECTTIMEOUT => 30,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
         );
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+        curl_setopt_array($ch, $options);
+
+        // make the call
         $result = curl_exec($ch);
+
+        // set info for diagnosis purposes
+        $this->info = @curl_getinfo($ch);
+
+        // close resource
         curl_close($ch);
+
         return $result;
 
     }
+
 }
