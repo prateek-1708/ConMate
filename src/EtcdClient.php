@@ -53,6 +53,14 @@ class EtcdClient
         return $json->node->value;
     }
 
+    public function setValueForKey($key, $value) {
+
+    }
+
+    public function setKeyFromSeed($seedJson) {
+
+    }
+
     /**
      * Build base url against which url for specific key would be built.
      *  e.g. http://localhost:14001/v2/keys/
