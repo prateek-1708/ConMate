@@ -1,5 +1,7 @@
 <?php
+require "../../ConMate/src/CurlConnect.php";
 require "../../ConMate/src/EtcdClient.php";
+
 /**
  * Created by PhpStorm.
  * User: prateeknayak

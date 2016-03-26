@@ -9,6 +9,10 @@
 
 namespace Wbd\ConMate;
 
+/**
+ * Class EtcdClient
+ * @package Wbd\ConMate
+ */
 class EtcdClient
 {
     const VERSION_SEGMENT = "v";
@@ -118,76 +122,4 @@ class EtcdClient
     public function setEtcdVersion($etcdVersion) {
         $this->etcdVersion = $etcdVersion;
     }
-}
-
-/**
- * Class CurlConnect
- *
- * Curl utility class to access etcd apis.
- * @package Wbd\ConMate
- */
-class CurlConnect
-{
-    private $info;
-    private static $instance = null;
-
-    public static function getInstance() {
-        if (null == self::$instance) {
-            self::$instance = new CurlConnect();
-        }
-        return self::$instance;
-    }
-
-
-    public function getCall(Array $params) {
-        return $this->curlise($params['url']);
-    }
-
-
-    /**
-     * Curlise means to do the usuall curl stuff with a request.
-     * @param $channel mixed curl channel
-     * @return bool|mixed
-     */
-    public function curlise($channel){
-
-        $result = false;
-
-        // let's create curl channel for all curl shenanigans
-        $ch = curl_init($channel);
-
-        // check if channel exists or not
-        if (false === $ch){
-            return $result;
-        }
-
-        // usual curl stuff I guess.
-        $options = array(
-            CURLOPT_FOLLOWLOCATION => 1,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_SSL_VERIFYPEER => 1,
-            CURLOPT_SSL_VERIFYHOST => 2,
-            CURLOPT_FORBID_REUSE => 1,
-            CURLOPT_CONNECTTIMEOUT => 30,
-            CURLOPT_HTTPHEADER => array(
-                'Content-Type: application/json'
-            ),
-        );
-
-        curl_setopt_array($ch, $options);
-
-        // make the call
-        $result = curl_exec($ch);
-
-        // set info for diagnosis purposes
-        $this->info = @curl_getinfo($ch);
-
-        // close resource
-        curl_close($ch);
-
-        return $result;
-
-    }
-
 }

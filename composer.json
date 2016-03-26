@@ -1,0 +1,17 @@
+{
+    "name": "Wbd/ConMate",
+    "description": "ConMate (Configuration Management Through etcd) is a small utility to use etcd in php projects.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Prateek Nayak",
+            "email": "prateek.1708@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-0" : {
+            "Wbd\\ConMate" : "src"
+        }
+    },
+    "require": {}
+}
